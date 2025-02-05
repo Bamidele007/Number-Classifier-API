@@ -1,41 +1,42 @@
-# app/utils/number_utils.py
-import requests
-from math import sqrt
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from utils.number_utils import *
 
-def is_prime(n: int) -> bool:
-    if n < 2:
-        return False
-    for i in range(2, int(sqrt(n)) + 1):
-        if n % i == 0:
-            return False
-    return True
+app = Flask(__name__)
+CORS(app)
 
-def is_perfect(n: int) -> bool:
-    if n < 2:
-        return False
-    divisors_sum = sum(i for i in range(1, n) if n % i == 0)
-    return divisors_sum == n
+@app.route('/', methods=['GET'])
+def health():
+    return jsonify({"status": "healthy"})
 
-def is_armstrong(n: int) -> bool:
-    num_str = str(n)
-    power = len(num_str)
-    return n == sum(int(digit) ** power for digit in num_str)
-
-def get_properties(n: int) -> list:
-    properties = []
-    if is_armstrong(n):
-        properties.append("armstrong")
-    properties.append("odd" if n % 2 else "even")
-    return properties
-
-def get_digit_sum(n: int) -> int:
-    return sum(int(digit) for digit in str(n))
-
-def get_fun_fact(n: int) -> str:
+@app.route('/api/classify-number', methods=['GET'])
+def classify_number():
     try:
-        response = requests.get(f"http://numbersapi.com/{n}/math")
-        if response.status_code == 200:
-            return response.text
-        return f"{n} is an {'Armstrong' if is_armstrong(n) else 'interesting'} number"
-    except:
-        return f"{n} is an {'Armstrong' if is_armstrong(n) else 'interesting'} number"
+        number = request.args.get('number')
+        if not number or not number.isdigit():
+            return jsonify({
+                "number": number,
+                "error": True
+            }), 400
+        
+        num = int(number)
+        return jsonify({
+            "number": num,
+            "is_prime": is_prime(num),
+            "is_perfect": is_perfect(num),
+            "properties": get_properties(num),
+            "digit_sum": get_digit_sum(num),
+            "fun_fact": get_fun_fact(num)
+        }), 200
+
+    except Exception as e:
+        print(f"Error: {str(e)}")  # Add logging
+        return jsonify({
+            "number": number if 'number' in locals() else None,
+            "error": True
+        }), 400
+
+application = app  # Add this line
+
+if __name__ == '__main__':
+    app.run()

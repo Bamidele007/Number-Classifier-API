@@ -22,7 +22,7 @@ def is_armstrong(n: int) -> bool:
 
 def get_properties(n: int) -> list:
     properties = []
-    if is_armstrong(n):
+    if is_armstrong(abs(n)):  # Use abs for Armstrong check
         properties.append("armstrong")
     properties.append("odd" if n % 2 else "even")
     return properties

@@ -14,28 +14,25 @@ def health_check():
 def classify_number():
     try:
         number = request.args.get('number')
-        if not number or not number.isdigit():
+        if not number:
             return jsonify({
                 "number": number,
                 "error": True
             }), 400
         
-        num = int(number)
+        # Convert to float first to handle decimals, then to int
+        num = int(float(number))
         return jsonify({
             "number": num,
-            "is_prime": is_prime(num),
-            "is_perfect": is_perfect(num),
+            "is_prime": is_prime(abs(num)),  # Use abs for negative numbers
+            "is_perfect": is_perfect(abs(num)),
             "properties": get_properties(num),
-            "digit_sum": get_digit_sum(num),
+            "digit_sum": get_digit_sum(abs(num)),
             "fun_fact": get_fun_fact(num)
         }), 200
 
-    except Exception as e:
-        print(f"Error: {str(e)}")
+    except ValueError:
         return jsonify({
-            "number": number if 'number' in locals() else None,
+            "number": number,
             "error": True
         }), 400
-
-if __name__ == '__main__':
-    app.run()

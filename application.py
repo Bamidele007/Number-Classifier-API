@@ -19,29 +19,21 @@ def health_check():
 
 @app.route('/api/classify-number', methods=['GET'])
 def classify_number():
-   try:
-       number = request.args.get('number')
-       
-       if not number or not is_valid_number(number):
-           return jsonify({"number": number, "error": True}), 400
+    try:
+        number = request.args.get('number', '')
+        float_num = float(number)  # Convert string to float
+        num = int(float_num)       # Convert float to int
+        abs_num = abs(num)         # Get absolute value
 
-       float_num = float(number)
-       num = int(float_num)
-       abs_num = abs(num)
-       
-       response = {
-           "number": num,
-           "is_prime": is_prime(abs_num) if abs_num > 0 else False,
-           "is_perfect": is_perfect(abs_num) if abs_num > 0 else False,
-           "properties": ["even"] if num % 2 == 0 else ["odd"],
-           "digit_sum": get_digit_sum(abs_num),
-           "fun_fact": get_fun_fact(num)
-       }
-       return jsonify(response), 200
+        response = {
+            "number": num,
+            "is_prime": is_prime(abs_num),
+            "is_perfect": is_perfect(abs_num),
+            "properties": ["even"] if num % 2 == 0 else ["odd"],
+            "digit_sum": get_digit_sum(abs_num),
+            "fun_fact": get_fun_fact(num)
+        }
+        return jsonify(response), 200
 
-   except Exception as e:
-       print(f"Error: {str(e)}")
-       return jsonify({"number": number if 'number' in locals() else None, "error": True}), 400
-
-if __name__ == '__main__':
-   app.run()
+    except ValueError:
+        return jsonify({"number": number, "error": True}), 400

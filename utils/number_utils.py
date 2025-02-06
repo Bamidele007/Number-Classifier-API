@@ -3,9 +3,10 @@ import requests
 from math import sqrt
 
 def is_prime(n: int) -> bool:
-    if n < 2:
+    # Negative numbers can't be prime
+    if n <= 1:  # Changed from n < 2 to catch both negative and 1
         return False
-    for i in range(2, int(sqrt(n)) + 1):
+    for i in range(2, int(sqrt(abs(n))) + 1):
         if n % i == 0:
             return False
     return True

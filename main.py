@@ -9,29 +9,31 @@ CORS(app)
 @app.route('/api/classify-number', methods=['GET'])
 def classify_number():
     try:
-        number = request.args.get('number', '')
+        input_number = request.args.get('number', '')
         
-        # Handle empty string case
-        if not number:
-            return jsonify({"number": None, "error": True}), 400
+        if not input_number:
+            return jsonify({
+                "number": input_number,
+                "error": True
+            }), 400
             
-        # Convert to number, handling both integers and floats
-        num = int(float(number))
+        num = int(float(input_number))
         abs_num = abs(num)
         
-        # Always return 200 if we got here
         return jsonify({
             "number": num,
-            "is_prime": is_prime(abs_num),
-            "is_perfect": is_perfect(abs_num),
-            "properties": ["even"] if num % 2 == 0 else ["odd"],
+            "is_prime": False if num <= 1 else is_prime(abs_num),
+            "is_perfect": False if num <= 1 else is_perfect(abs_num),
+            "properties": get_properties(num),
             "digit_sum": get_digit_sum(abs_num),
             "fun_fact": get_fun_fact(num)
         }), 200
         
     except (ValueError, TypeError):
-        # Only return 400 for non-numeric strings
-        return jsonify({"number": number, "error": True}), 400
+        return jsonify({
+            "number": input_number,
+            "error": True
+        }), 400
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
